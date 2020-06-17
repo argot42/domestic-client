@@ -4,12 +4,11 @@ package require Tk
 package require json;   # using tcllib
 
 # arguments
-#if { $argc < 1 } {
-#    puts stderr "usage: $argv0 <jsonfile>"
-#    exit 1
-#}
-#set filepath [lindex $argv 0]
-set filepath status.json
+if { $argc < 1 } {
+    puts stderr "usage: $argv0 <jsonfile>"
+    exit 1
+}
+set filepath [lindex $argv 0]
 
 proc refresh { filepath } {
     # get info from the status file 
@@ -28,13 +27,29 @@ proc refresh { filepath } {
     global income
     set income [dict get $unmarshalled "Income" "Total"]
     global incomeEntries
-    set incomeEntries [dict get $unmarshalled "Income" "Entries"]
+    set entries [dict get $unmarshalled "Income" "Entries"]
+    
+    foreach entry $entries {
+        set name [dict get $entry "Name"]
+        set amount [dict get $entry "Amount"]
+        set date [dict get $entry "Date"]
+
+        lappend incomeEntries "$name $amount $date"
+    }
 
     # expenses
     global expenses
     set expenses [dict get $unmarshalled "Expenses" "Total"]
     global expensesEntries
-    set expensesEntries [dict get $unmarshalled "Expenses" "Entries"]
+    set entries [dict get $unmarshalled "Expenses" "Entries"]
+
+    foreach entry $entries {
+        set name [dict get $entry "Name"]
+        set amount [dict get $entry "Amount"]
+        set date [dict get $entry "Date"]
+
+        lappend expensesEntries "$name $amount $date"
+    }
 
     # balance
     global balance
@@ -77,7 +92,6 @@ set savingsTitle "Savings"
 set freeTitle "Free"
 global savings; set savings 0
 global free; set free 0
-set xpadding 10
 
 ttk::frame .body.treasury -borderwidth 1 -relief solid
 ttk::label .body.treasury.savingsTitle -textvariable savingsTitle
@@ -86,10 +100,10 @@ ttk::label .body.treasury.savings -textvariable savings
 ttk::label .body.treasury.free -textvariable free 
 
 grid .body.treasury -column 0 -row 0 -sticky news
-grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw -padx $xpadding
-grid .body.treasury.freeTitle -column 1 -row 0 -sticky nw -padx $xpadding
-grid .body.treasury.savings -column 0 -row 1 -sticky nw -padx $xpadding
-grid .body.treasury.free -column 1 -row 1 -sticky nw -padx $xpadding
+grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw
+grid .body.treasury.freeTitle -column 1 -row 0 -sticky nw
+grid .body.treasury.savings -column 0 -row 1 -sticky nw
+grid .body.treasury.free -column 1 -row 1 -sticky nw
 
 # income
 set incomeTitle "Income"
@@ -99,7 +113,7 @@ global incomeEntries
 ttk::frame .body.income -borderwidth 1 -relief solid
 ttk::label .body.income.title -textvariable incomeTitle
 ttk::label .body.income.value -textvariable income
-tk::listbox .body.income.entries -yscrollcommand ".body.income.scroll set" -height 5
+tk::listbox .body.income.entries -yscrollcommand ".body.income.scroll set" -height 5 -listvariable incomeEntries
 ttk::scrollbar .body.income.scroll -command ".body.income.entries yview" -orient vertical
 
 grid .body.income -column 0 -row 1 -sticky news
@@ -120,7 +134,7 @@ global expenses; set expenses 0
 ttk::frame .body.expenses -borderwidth 1 -relief solid
 ttk::label .body.expenses.title -textvariable expensesTitle
 ttk::label .body.expenses.value -textvariable expenses
-tk::listbox .body.expenses.entries -yscrollcommand ".body.expenses.scroll set" -height 5
+tk::listbox .body.expenses.entries -yscrollcommand ".body.expenses.scroll set" -height 5 -listvariable expensesEntries
 ttk::scrollbar .body.expenses.scroll -command ".body.expenses.entries yview" -orient vertical
 
 grid .body.expenses -column 0 -row 2 -sticky news
