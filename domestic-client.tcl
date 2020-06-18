@@ -24,6 +24,12 @@ proc refresh { filepath } {
     global treasuryEntries
     set entries [dict get $unmarshalled "Treasury" "Entries"]
     set treasuryEntries [getEntryList $entries]
+    
+    global savingsPercent
+    global savings
+    global free
+    set savings [format %.2f [expr $treasury * $savingsPercent]]
+    set free [format %.2f [expr $treasury - $free]]
 
     # income
     global income
@@ -45,7 +51,7 @@ proc refresh { filepath } {
 }
 
 proc getEntryList { entryMap } {
-    variable entries
+    set entries [list]
 
     foreach entry $entryMap {
         set name [dict get $entry "Name"]
@@ -97,6 +103,7 @@ set savingsTitle "Savings"
 set freeTitle "Free"
 global savings; set savings 0
 global free; set free 0
+global savingsPercent; set savingsPercent 0.3
 
 ttk::frame .body.treasury -borderwidth 1 -relief solid
 ttk::label .body.treasury.savingsTitle -textvariable savingsTitle
