@@ -4,11 +4,12 @@ package require Tk
 package require json;   # using tcllib
 
 # arguments
-if { $argc < 1 } {
-    puts stderr "usage: $argv0 <jsonfile>"
-    exit 1
-}
-set filepath [lindex $argv 0]
+#if { $argc < 1 } {
+#    puts stderr "usage: $argv0 <jsonfile>"
+#    exit 1
+#}
+#set filepath [lindex $argv 0]
+set filepath "status.json"
 
 proc refresh { filepath } {
     # get info from the status file 
@@ -21,39 +22,40 @@ proc refresh { filepath } {
     global treasury
     set treasury [dict get $unmarshalled "Treasury" "Total"]
     global treasuryEntries
-    set treasuryEntries [dict get $unmarshalled "Treasury" "Entries"]
+    set entries [dict get $unmarshalled "Treasury" "Entries"]
+    set treasuryEntries [getEntryList $entries]
 
     # income
     global income
     set income [dict get $unmarshalled "Income" "Total"]
     global incomeEntries
     set entries [dict get $unmarshalled "Income" "Entries"]
-    
-    foreach entry $entries {
-        set name [dict get $entry "Name"]
-        set amount [dict get $entry "Amount"]
-        set date [dict get $entry "Date"]
-
-        lappend incomeEntries "$name $amount $date"
-    }
+    set incomeEntries [getEntryList $entries]    
 
     # expenses
     global expenses
     set expenses [dict get $unmarshalled "Expenses" "Total"]
     global expensesEntries
     set entries [dict get $unmarshalled "Expenses" "Entries"]
-
-    foreach entry $entries {
-        set name [dict get $entry "Name"]
-        set amount [dict get $entry "Amount"]
-        set date [dict get $entry "Date"]
-
-        lappend expensesEntries "$name $amount $date"
-    }
+    set expensesEntries [getEntryList $entries]
 
     # balance
     global balance
     set balance [dict get $unmarshalled "Balance"]
+}
+
+proc getEntryList { entryMap } {
+    variable entries
+
+    foreach entry $entryMap {
+        set name [dict get $entry "Name"]
+        set amount [dict get $entry "Amount"]
+        set date [dict get $entry "Date"]
+
+        lappend entries "$name $amount $date"
+    }
+
+    return $entries
 }
 
 # ### Main Page ###
@@ -87,6 +89,9 @@ grid .body -column 0 -row 0 -sticky nsew
 # make body fill length
 grid columnconfigure .body 0 -weight 1
 
+# labels padding
+set top "5 0"
+
 # treasury
 set savingsTitle "Savings"
 set freeTitle "Free"
@@ -98,12 +103,21 @@ ttk::label .body.treasury.savingsTitle -textvariable savingsTitle
 ttk::label .body.treasury.freeTitle -textvariable freeTitle
 ttk::label .body.treasury.savings -textvariable savings
 ttk::label .body.treasury.free -textvariable free 
+tk::listbox .body.treasury.entries -yscrollcommand ".body.treasury.scroll set" -height 5 -listvariable treasuryEntries
+ttk::scrollbar .body.treasury.scroll -command ".body.treasury.entries yview" -orient vertical
 
-grid .body.treasury -column 0 -row 0 -sticky news
+grid .body.treasury -column 0 -row 0 -sticky news -pady $top
 grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw
 grid .body.treasury.freeTitle -column 1 -row 0 -sticky nw
 grid .body.treasury.savings -column 0 -row 1 -sticky nw
 grid .body.treasury.free -column 1 -row 1 -sticky nw
+grid .body.treasury.entries -columnspan 3 -column 0 -row 2 -sticky news
+grid .body.treasury.scroll -column 3 -row 2 -sticky ns
+
+# make income frame and listbox resize with window
+grid rowconfigure .body 0 -weight 1
+grid columnconfigure .body.treasury 2 -weight 1
+grid rowconfigure .body.treasury 2 -weight 1
 
 # income
 set incomeTitle "Income"
@@ -116,8 +130,8 @@ ttk::label .body.income.value -textvariable income
 tk::listbox .body.income.entries -yscrollcommand ".body.income.scroll set" -height 5 -listvariable incomeEntries
 ttk::scrollbar .body.income.scroll -command ".body.income.entries yview" -orient vertical
 
-grid .body.income -column 0 -row 1 -sticky news
-grid .body.income.title -column 0 -row 0
+grid .body.income -column 0 -row 1 -sticky news -pady $top
+grid .body.income.title -column 0 -row 0 
 grid .body.income.value -column 1 -row 0
 grid .body.income.entries -columnspan 3 -column 0 -row 1 -sticky nwes
 grid .body.income.scroll -column 3 -row 1 -sticky ns
@@ -137,7 +151,7 @@ ttk::label .body.expenses.value -textvariable expenses
 tk::listbox .body.expenses.entries -yscrollcommand ".body.expenses.scroll set" -height 5 -listvariable expensesEntries
 ttk::scrollbar .body.expenses.scroll -command ".body.expenses.entries yview" -orient vertical
 
-grid .body.expenses -column 0 -row 2 -sticky news
+grid .body.expenses -column 0 -row 2 -sticky news -pady $top
 grid .body.expenses.title -column 0 -row 0
 grid .body.expenses.value -column 1 -row 0
 grid .body.expenses.entries -columnspan 3 -column 0 -row 1 -sticky news
@@ -156,7 +170,7 @@ ttk::frame .body.balance -borderwidth 1 -relief solid
 ttk::label .body.balance.title -textvariable balanceTitle
 ttk::label .body.balance.value -textvariable balance
 
-grid .body.balance -column 0 -row 3 -sticky news
+grid .body.balance -column 0 -row 3 -sticky news -pady $top
 grid .body.balance.title -column 0 -row 0
 grid .body.balance.value -column 1 -row 0
 
