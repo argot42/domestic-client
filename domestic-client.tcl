@@ -107,7 +107,7 @@ tk::listbox .body.treasury.entries -yscrollcommand ".body.treasury.scroll set" -
 ttk::scrollbar .body.treasury.scroll -command ".body.treasury.entries yview" -orient vertical
 
 grid .body.treasury -column 0 -row 0 -sticky news -pady $top
-grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw
+grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw -padx "0 10"
 grid .body.treasury.freeTitle -column 1 -row 0 -sticky nw
 grid .body.treasury.savings -column 0 -row 1 -sticky nw
 grid .body.treasury.free -column 1 -row 1 -sticky nw
@@ -131,7 +131,7 @@ tk::listbox .body.income.entries -yscrollcommand ".body.income.scroll set" -heig
 ttk::scrollbar .body.income.scroll -command ".body.income.entries yview" -orient vertical
 
 grid .body.income -column 0 -row 1 -sticky news -pady $top
-grid .body.income.title -column 0 -row 0 
+grid .body.income.title -column 0 -row 0 -padx "0 10"
 grid .body.income.value -column 1 -row 0
 grid .body.income.entries -columnspan 3 -column 0 -row 1 -sticky nwes
 grid .body.income.scroll -column 3 -row 1 -sticky ns
@@ -152,7 +152,7 @@ tk::listbox .body.expenses.entries -yscrollcommand ".body.expenses.scroll set" -
 ttk::scrollbar .body.expenses.scroll -command ".body.expenses.entries yview" -orient vertical
 
 grid .body.expenses -column 0 -row 2 -sticky news -pady $top
-grid .body.expenses.title -column 0 -row 0
+grid .body.expenses.title -column 0 -row 0 -padx "0 10"
 grid .body.expenses.value -column 1 -row 0
 grid .body.expenses.entries -columnspan 3 -column 0 -row 1 -sticky news
 grid .body.expenses.scroll -column 3 -row 1 -sticky ns
@@ -171,7 +171,7 @@ ttk::label .body.balance.title -textvariable balanceTitle
 ttk::label .body.balance.value -textvariable balance
 
 grid .body.balance -column 0 -row 3 -sticky news -pady $top
-grid .body.balance.title -column 0 -row 0
+grid .body.balance.title -column 0 -row 0 -padx "0 10"
 grid .body.balance.value -column 1 -row 0
 
 # #####################
