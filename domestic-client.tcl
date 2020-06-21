@@ -3,13 +3,12 @@
 package require Tk
 package require json;   # using tcllib
 
-# arguments
-#if { $argc < 1 } {
-#    puts stderr "usage: $argv0 <jsonfile>"
-#    exit 1
-#}
-#set filepath [lindex $argv 0]
-set filepath "status.json"
+ arguments
+if { $argc < 1 } {
+    puts stderr "usage: $argv0 <jsonfile>"
+    exit 1
+}
+set filepath [lindex $argv 0]
 
 proc refresh { filepath } {
     # get info from the status file 
@@ -28,8 +27,9 @@ proc refresh { filepath } {
     global savingsPercent
     global savings
     global free
-    set savings [format %.2f [expr $treasury * $savingsPercent]]
-    set free [format %.2f [expr $treasury - $free]]
+    set numericPercent [expr $savingsPercent / 100.0]
+    set savings [format %.2f [expr $treasury * $numericPercent]]
+    set free [format %.2f [expr $treasury - $savings]]
 
     # income
     global income
@@ -103,7 +103,7 @@ set savingsTitle "Savings"
 set freeTitle "Free"
 global savings; set savings 0
 global free; set free 0
-global savingsPercent; set savingsPercent 0.3
+global savingsPercent; set savingsPercent 30
 
 ttk::frame .body.treasury -borderwidth 1 -relief solid
 ttk::label .body.treasury.savingsTitle -textvariable savingsTitle
@@ -112,6 +112,7 @@ ttk::label .body.treasury.savings -textvariable savings
 ttk::label .body.treasury.free -textvariable free 
 tk::listbox .body.treasury.entries -yscrollcommand ".body.treasury.scroll set" -height 5 -listvariable treasuryEntries
 ttk::scrollbar .body.treasury.scroll -command ".body.treasury.entries yview" -orient vertical
+tk::scale .body.treasury.scale -from 0 -to 100 -orient horizontal -variable savingsPercent
 
 grid .body.treasury -column 0 -row 0 -sticky news -pady $top
 grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw -padx "0 10"
@@ -120,6 +121,7 @@ grid .body.treasury.savings -column 0 -row 1 -sticky nw
 grid .body.treasury.free -column 1 -row 1 -sticky nw
 grid .body.treasury.entries -columnspan 3 -column 0 -row 2 -sticky news
 grid .body.treasury.scroll -column 3 -row 2 -sticky ns
+grid .body.treasury.scale -column 0 -row 3 -columnspan 3 -sticky news
 
 # make income frame and listbox resize with window
 grid rowconfigure .body 0 -weight 1
