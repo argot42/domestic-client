@@ -208,5 +208,5 @@ grid .body.balance.value -column 1 -row 0
 
 # #####################
 
-refresh $filepath
 loadConfig $configpath
+refresh $filepath
