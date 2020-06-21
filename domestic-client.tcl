@@ -3,12 +3,13 @@
 package require Tk
 package require json;   # using tcllib
 
- arguments
+# arguments
 if { $argc < 1 } {
     puts stderr "usage: $argv0 <jsonfile>"
     exit 1
 }
 set filepath [lindex $argv 0]
+set configpath "config.json"
 
 proc refresh { filepath } {
     # get info from the status file 
@@ -64,6 +65,31 @@ proc getEntryList { entryMap } {
     return $entries
 }
 
+proc save {path} {
+    global savingsPercent
+    set cfg [dict create savingsPercent $savingsPercent]    
+    set j [json::dict2json $cfg]
+
+    set configFile [open $path "w"]
+    puts $configFile $j
+    close $configFile
+}
+
+proc closeWindow {} {
+    exit 0
+}
+
+proc loadConfig {path} {
+    set f [open $path]
+    set data [read $f]
+    close $f
+
+    set cfg [json::json2dict $data]
+
+    global savingsPercent
+    set savingsPercent [dict get $cfg "savingsPercent"]
+}
+
 # ### Main Page ###
 
 # top menubar
@@ -76,12 +102,9 @@ menu $m
 
 menu $m.file
 $m add cascade -menu $m.file -label File
+$m.file add command -label "Save" -command {"save" $configpath}
 $m.file add command -label "Refresh" -command {"refresh" $filepath}
 $m.file add command -label "Close" -command "closeWindow"
-
-proc closeWindow {} {
-    exit 0
-}
 
 # body
 
@@ -103,7 +126,7 @@ set savingsTitle "Savings"
 set freeTitle "Free"
 global savings; set savings 0
 global free; set free 0
-global savingsPercent; set savingsPercent 30
+global savingsPercent;
 
 ttk::frame .body.treasury -borderwidth 1 -relief solid
 ttk::label .body.treasury.savingsTitle -textvariable savingsTitle
@@ -186,3 +209,4 @@ grid .body.balance.value -column 1 -row 0
 # #####################
 
 refresh $filepath
+loadConfig $configpath

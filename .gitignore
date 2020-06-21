@@ -1,4 +1,5 @@
 status.json
+config.json
 
 # Swap
 [._]*.s[a-v][a-z]
