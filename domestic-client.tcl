@@ -75,10 +75,6 @@ proc save {path} {
     close $configFile
 }
 
-proc closeWindow {} {
-    exit 0
-}
-
 proc loadConfig {path} {
     set f [open $path]
     set data [read $f]
@@ -88,6 +84,10 @@ proc loadConfig {path} {
 
     global savingsPercent
     set savingsPercent [dict get $cfg "savingsPercent"]
+}
+
+proc closeWindow {} {
+    destroy .
 }
 
 # ### Main Page ###
@@ -105,6 +105,19 @@ $m add cascade -menu $m.file -label File
 $m.file add command -label "Save" -command {"save" $configpath}
 $m.file add command -label "Refresh" -command {"refresh" $filepath}
 $m.file add command -label "Close" -command "closeWindow"
+
+# catching close event
+bind . <Destroy> { 
+    if {"%W" == "."} {
+        save $configpath
+        puts "bye bye!"
+    }
+}
+
+# this method is good for pop sweet pop ups to annoy the user
+#wm protocol . WM_DELETE_WINDOW {
+#    puts "away I go"
+#}
 
 # body
 
