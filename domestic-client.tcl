@@ -25,12 +25,7 @@ proc refresh { filepath } {
     set entries [dict get $unmarshalled "Treasury" "Entries"]
     set treasuryEntries [getEntryList $entries]
     
-    global savingsPercent
-    global savings
-    global free
-    set numericPercent [expr $savingsPercent / 100.0]
-    set savings [format %.2f [expr $treasury * $numericPercent]]
-    set free [format %.2f [expr $treasury - $savings]]
+    updateSavings
 
     # income
     global income
@@ -65,6 +60,16 @@ proc getEntryList { entryMap } {
     return $entries
 }
 
+proc updateSavings {} {
+    global treasury
+    global savingsPercent
+    global savings
+    global free
+    set numericPercent [expr $savingsPercent / 100.0]
+    set savings [format %.2f [expr $treasury * $numericPercent]]
+    set free [format %.2f [expr $treasury - $savings]]
+}
+
 proc save {path} {
     global savingsPercent
     set cfg [dict create savingsPercent $savingsPercent]    
@@ -88,6 +93,10 @@ proc loadConfig {path} {
 
 proc closeWindow {} {
     destroy .
+}
+
+proc onChangePercent {value} {
+    updateSavings
 }
 
 # ### Main Page ###
@@ -148,21 +157,21 @@ ttk::label .body.treasury.savings -textvariable savings
 ttk::label .body.treasury.free -textvariable free 
 tk::listbox .body.treasury.entries -yscrollcommand ".body.treasury.scroll set" -height 5 -listvariable treasuryEntries
 ttk::scrollbar .body.treasury.scroll -command ".body.treasury.entries yview" -orient vertical
-tk::scale .body.treasury.scale -from 0 -to 100 -orient horizontal -variable savingsPercent
+tk::scale .body.treasury.scale -from 0 -to 100 -orient horizontal -variable savingsPercent -command onChangePercent
 
 grid .body.treasury -column 0 -row 0 -sticky news -pady $top
 grid .body.treasury.savingsTitle -column 0 -row 0 -sticky nw -padx "0 10"
 grid .body.treasury.freeTitle -column 1 -row 0 -sticky nw
 grid .body.treasury.savings -column 0 -row 1 -sticky nw
 grid .body.treasury.free -column 1 -row 1 -sticky nw
-grid .body.treasury.entries -columnspan 3 -column 0 -row 2 -sticky news
-grid .body.treasury.scroll -column 3 -row 2 -sticky ns
-grid .body.treasury.scale -column 0 -row 3 -columnspan 3 -sticky news
+grid .body.treasury.scale -column 0 -row 2 -columnspan 4 -sticky news
+grid .body.treasury.entries -columnspan 3 -column 0 -row 3 -sticky news
+grid .body.treasury.scroll -column 3 -row 3 -sticky ns
 
 # make income frame and listbox resize with window
 grid rowconfigure .body 0 -weight 1
 grid columnconfigure .body.treasury 2 -weight 1
-grid rowconfigure .body.treasury 2 -weight 1
+grid rowconfigure .body.treasury 3 -weight 1
 
 # income
 set incomeTitle "Income"
